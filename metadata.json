@@ -1,0 +1,5 @@
+{
+  "name": "Fahim - Arabic PDF to Mind Map",
+  "description": "An advanced educational tool that converts Arabic PDFs into structured mind maps using Gemini AI, preserving full academic context and supporting image generation for concepts.",
+  "requestFramePermissions": []
+}
