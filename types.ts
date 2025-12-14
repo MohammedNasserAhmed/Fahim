@@ -26,6 +26,13 @@ export interface GeneratedImage {
   relatedConcept: string;
 }
 
+export interface ExportState {
+  isActive: boolean;
+  status: 'initializing' | 'rendering' | 'finalizing' | 'complete' | 'error';
+  progress: number; // 0 to 100
+  detail: string;
+}
+
 // For PDF.js
 declare global {
   const pdfjsLib: any;

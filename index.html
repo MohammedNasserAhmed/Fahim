@@ -28,14 +28,15 @@
         height: 8px;
       }
       ::-webkit-scrollbar-track {
-        background: #f1f1f1; 
+        background: #FFFFFF; 
+        border-left: 1px solid #eee;
       }
       ::-webkit-scrollbar-thumb {
-        background: #888; 
-        border-radius: 4px;
+        background: #E65100; 
+        border-radius: 0;
       }
       ::-webkit-scrollbar-thumb:hover {
-        background: #555; 
+        background: #CC4700; 
       }
     </style>
   <script type="importmap">
@@ -46,12 +47,14 @@
     "d3": "https://esm.sh/d3@^7.9.0",
     "react/": "https://esm.sh/react@^19.2.3/",
     "react": "https://esm.sh/react@^19.2.3",
-    "@google/genai": "https://esm.sh/@google/genai@^1.33.0"
+    "@google/genai": "https://esm.sh/@google/genai@^1.33.0",
+    "html2canvas": "https://esm.sh/html2canvas@1.4.1",
+    "jspdf": "https://esm.sh/jspdf@2.5.1"
   }
 }
 </script>
 </head>
-  <body class="bg-slate-50 text-slate-900">
+  <body class="bg-white text-[#111111]">
     <div id="root"></div>
   </body>
 </html>

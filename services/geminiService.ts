@@ -8,7 +8,7 @@ const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
  * Uses gemini-2.5-flash for speed and large context window.
  */
 export const analyzeArabicText = async (text: string): Promise<AnalyzedSection> => {
-  const modelId = "gemini-2.5-flash"; // Optimized for text processing
+  const modelId = "gemini-2.5-flash"; 
 
   const prompt = `
     You are an expert Arabic educational consultant. 
@@ -48,8 +48,6 @@ export const analyzeArabicText = async (text: string): Promise<AnalyzedSection> 
       contents: prompt,
       config: {
         responseMimeType: "application/json",
-        // Recursive schema definition removed as it causes INVALID_ARGUMENT in strict mode. 
-        // We rely on the prompt and responseMimeType for JSON structure.
       }
     });
 
@@ -64,11 +62,10 @@ export const analyzeArabicText = async (text: string): Promise<AnalyzedSection> 
     };
   } catch (e) {
     console.error("AI Analysis failed", e);
-    // Return structured error/fallback to allow UI to render something
     return {
       id: crypto.randomUUID(),
       title: "خطأ في المعالجة",
-      originalText: text, // Return raw text so user doesn't lose data
+      originalText: text, 
       mindMap: { 
         name: "خطأ في التحليل", 
         type: "root", 
@@ -77,76 +74,4 @@ export const analyzeArabicText = async (text: string): Promise<AnalyzedSection> 
       }
     };
   }
-};
-
-/**
- * Generates an educational illustration using Gemini 2.5 Flash Image.
- * Supports the "Nano banana" requirement for image generation.
- */
-export const generateConceptImage = async (concept: string, context: string): Promise<string> => {
-  // Using gemini-2.5-flash-image (often aliased, using specific model name)
-  const modelId = "gemini-2.5-flash-image"; 
-  
-  const prompt = `Create a clear, educational illustration explaining the concept: "${concept}". 
-  Context: ${context}. 
-  Style: Clean, flat vector art, suitable for an Arabic textbook.`;
-
-  try {
-     const response = await ai.models.generateContent({
-        model: modelId,
-        contents: prompt,
-     });
-
-    // Check for image in response parts
-    if (response.candidates?.[0]?.content?.parts) {
-        for (const part of response.candidates[0].content.parts) {
-            if (part.inlineData && part.inlineData.mimeType.startsWith('image/')) {
-                return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
-            }
-        }
-    }
-    
-    // If no image found (or model refused), return a placeholder or handle error
-    return "https://picsum.photos/400/300";
-
-  } catch (error) {
-    console.error("Image generation failed", error);
-    // Fallback
-    return "https://picsum.photos/400/300?error=true";
-  }
-};
-
-/**
- * Edits an existing image using Gemini 2.5 Flash Image.
- * Fulfills the "Nano banana powered app" requirement.
- */
-export const editConceptImage = async (base64Image: string, editPrompt: string): Promise<string> => {
-  const modelId = "gemini-2.5-flash-image";
-
-  // Strip prefix if present
-  const base64Data = base64Image.split(',')[1] || base64Image;
-
-  const response = await ai.models.generateContent({
-    model: modelId,
-    contents: {
-      parts: [
-        {
-          inlineData: {
-            mimeType: "image/png", // Assuming PNG or standard image
-            data: base64Data
-          }
-        },
-        { text: editPrompt }
-      ]
-    }
-  });
-
-   if (response.candidates?.[0]?.content?.parts) {
-        for (const part of response.candidates[0].content.parts) {
-            if (part.inlineData && part.inlineData.mimeType.startsWith('image/')) {
-                return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
-            }
-        }
-    }
-    throw new Error("No image returned from edit operation.");
 };
