@@ -1,10 +1,9 @@
-# arabic-chat-with-pdf 🚀📄🤖
+# Fahim 🚀📄🤖
 
-[![Project](https://img.shields.io/badge/project-arabic--chat--with--pdf-blue)](https://github.com/MohammedNasserAhmed/Fahim)
+[![Project](https://img.shields.io/badge/project-Fahim-blue)](https://github.com/MohammedNasserAhmed/Fahim)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Built with Vite](https://img.shields.io/badge/built%20with-vite-FF69B4.svg)](https://vitejs.dev/)
 [![Gemini LLM](https://img.shields.io/badge/LLM-Gemini--2.5--flash-orange.svg)](#)
-[![PDF.js](https://img.shields.io/badge/pdf.js-text-extraction-green.svg)](#)
 
 > Fahim — Intelligent Arabic PDF-to-Mind-Map and chat interface  
 > Convert Arabic PDFs to structured, searchable mind maps using Google Gemini and modern PDF processing.
