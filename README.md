@@ -1,6 +1,6 @@
-# arabic-chat-with-pdf 🚀📄🤖
+# Fahim 🚀📄🤖
 
-[![Project](https://img.shields.io/badge/project-arabic--chat--with--pdf-blue)](https://github.com/MohammedNasserAhmed/Fahim)
+[![Project](https://img.shields.io/badge/project-Fahim-blue)](https://github.com/MohammedNasserAhmed/Fahim)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Built with Vite](https://img.shields.io/badge/built%20with-vite-FF69B4.svg)](https://vitejs.dev/)
 [![Gemini LLM](https://img.shields.io/badge/LLM-Gemini--2.5--flash-orange.svg)](#)
@@ -208,19 +208,6 @@ This JSON is parsed and converted into an `AnalyzedSection` (with a generated UU
 
 ---
 
-## Suggested Emojis & Badges 🎨
-
-Emojis:
-- 🚀, 📄, 🤖, 🧠, 🗺️, ✨, ⚠️, 🔒, 📤, 📥
-
-Suggested shields:
-- [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-- [![Built with Vite](https://img.shields.io/badge/built%20with-vite-FF69B4.svg)](https://vitejs.dev/)
-- [![Gemini LLM](https://img.shields.io/badge/LLM-Gemini--2.5--flash-orange.svg)](#)
-- [![PDF.js](https://img.shields.io/badge/pdf.js-text-extraction-green.svg)](#)
-
----
-
 ## Limitations of Usage & Responsible Use 🛡️
 
 - Verify you have rights to process uploaded PDFs.
@@ -266,19 +253,3 @@ MIT License — see LICENSE file (recommended).
 If you want, I can:
 - Produce the final README.md file in the repository (create PR or push) — let me know whether to use MIT or another license and whether you want the README written in Arabic (or bilingual).
 - Inspect additional files in `components/` and `services/` to enrich the README with exact prop names, screenshots, or examples (note: my earlier search may be incomplete; I can fetch more files).
-# Run and deploy your AI Studio app
-
-This contains everything you need to run your app locally.
-
-View your app in AI Studio: https://ai.studio/apps/drive/1MY1MzHOwixW9N3S64XJ_jPX57e5aGh2q
-
-## Run Locally
-
-**Prerequisites:**  Node.js
-
-
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
