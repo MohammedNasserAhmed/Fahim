@@ -3,12 +3,16 @@ import { AnalyzedSection } from "../types";
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 /**
  * Analyzes Arabic text to produce structured content and a mind map.
  * Uses gemini-2.5-flash for speed and large context window.
+ * Implements robust retry logic and fallback for failures.
  */
-export const analyzeArabicText = async (text: string): Promise<AnalyzedSection> => {
+export const analyzeArabicText = async (text: string, attempt = 1): Promise<AnalyzedSection> => {
   const modelId = "gemini-2.5-flash"; 
+  const MAX_RETRIES = 5;
 
   const prompt = `
     You are an expert Arabic educational consultant. 
@@ -52,7 +56,12 @@ export const analyzeArabicText = async (text: string): Promise<AnalyzedSection> 
     });
 
     const jsonStr = response.text || "{}";
-    const data = JSON.parse(jsonStr);
+    let data;
+    try {
+        data = JSON.parse(jsonStr);
+    } catch (parseError) {
+        throw new Error("Invalid JSON received from model");
+    }
 
     return {
       id: crypto.randomUUID(),
@@ -60,17 +69,42 @@ export const analyzeArabicText = async (text: string): Promise<AnalyzedSection> 
       originalText: data.originalText || text,
       mindMap: data.mindMap || { name: "تعذر إنشاء الخريطة", type: "root", children: [] }
     };
-  } catch (e) {
-    console.error("AI Analysis failed", e);
+  } catch (e: any) {
+    console.warn(`Analysis attempt ${attempt} failed:`, e);
+    
+    if (attempt < MAX_RETRIES) {
+      // Progressive backoff: 2s, 4s, 6s... + jitter
+      const backoffTime = 2000 * attempt + (Math.random() * 500); 
+      await delay(backoffTime);
+      return analyzeArabicText(text, attempt + 1);
+    }
+    
+    // If all retries fail, return a fallback object instead of throwing.
+    // This ensures the application continues processing other pages.
+    console.error("All analysis attempts failed. Returning fallback content.");
+    
     return {
       id: crypto.randomUUID(),
-      title: "خطأ في المعالجة",
-      originalText: text, 
-      mindMap: { 
-        name: "خطأ في التحليل", 
-        type: "root", 
-        details: "لم نتمكن من تحليل هذا الجزء. يرجى المحاولة مرة أخرى.",
-        children: [] 
+      title: "فشل التحليل الآلي",
+      originalText: text, // Preserve the original text so the user doesn't lose data
+      mindMap: {
+        name: "فشل المعالجة",
+        type: "root",
+        details: "حدث خطأ أثناء تحليل هذه الصفحة. النص الأصلي متاح للقراءة.",
+        children: [
+            {
+                name: "النص محفوظ",
+                type: "main",
+                details: "يمكنك مراجعة النص الكامل في القسم الأيمن.",
+                children: []
+            },
+            {
+                name: "تفاصيل الخطأ",
+                type: "sub",
+                details: e.message || "خطأ في الاتصال بالذكاء الاصطناعي",
+                children: []
+            }
+        ]
       }
     };
   }

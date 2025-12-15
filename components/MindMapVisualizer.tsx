@@ -1,12 +1,14 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
+import html2canvas from 'html2canvas';
+import { Download, Loader2 } from 'lucide-react';
 import { MindMapNode } from '../types';
 
 interface Props {
   data: MindMapNode;
 }
 
-// Visual Configuration - Strict Palette
+// Visual Configuration - High Contrast Dark Palette
 const CONFIG = {
   nodeMaxWidth: 240,
   minNodeHeight: 64,
@@ -20,14 +22,14 @@ const CONFIG = {
   // Palette
   colors: {
     background: "#FFFFFF",
-    text: "#111111",
-    border: "#111111",
-    accent: "#E65100", // Dark Orange
+    text: "#FFFFFF", // Always white text for nodes
+    border: "#FFFFFF", // White border for contrast
+    accent: "#E65100", // Dark Orange for links
     nodes: {
-        root: "#FFF8E1",  // Very light amber for root
-        main: "#FFF3E0",  // Light orange tint for main branches
-        sub: "#FAFAFA",   // Very light gray for sub-branches
-        detail: "#FFFFFF" // Pure white for details
+        root: "#E65100",  // Dark Orange (Brand)
+        main: "#37474F",  // Dark Blue Gray
+        sub: "#4E342E",   // Dark Brown
+        detail: "#424242" // Dark Gray
     }
   }
 };
@@ -35,6 +37,7 @@ const CONFIG = {
 const MindMapVisualizer: React.FC<Props> = ({ data }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
     if (!data || !svgRef.current || !wrapperRef.current) return;
@@ -129,62 +132,25 @@ const MindMapVisualizer: React.FC<Props> = ({ data }) => {
       .attr("viewBox", `${viewBoxX} ${viewBoxY} ${viewBoxW} ${viewBoxH}`)
       .attr("dir", "rtl");
 
-    // Define Shadow Filter
-    const defs = svgElement.append("defs");
-    const filter = defs.append("filter")
-      .attr("id", "node-shadow")
-      .attr("height", "130%");
-    
-    filter.append("feGaussianBlur")
-      .attr("in", "SourceAlpha")
-      .attr("stdDeviation", 2) // Subtle blur
-      .attr("result", "blur");
-      
-    filter.append("feOffset")
-      .attr("in", "blur")
-      .attr("dx", 1) // Subtle offset
-      .attr("dy", 2)
-      .attr("result", "offsetBlur");
-      
-    filter.append("feComponentTransfer")
-       .append("feFuncA")
-       .attr("type", "linear")
-       .attr("slope", 0.3); // Reduce shadow opacity
-
-    const feMerge = filter.append("feMerge");
-    feMerge.append("feMergeNode").attr("in", "offsetBlur");
-    feMerge.append("feMergeNode").attr("in", "SourceGraphic");
-
     // 6. Rendering
     const g = svgElement.append("g");
 
     const screenX = (d: any) => -d.y;
     const screenY = (d: any) => d.x;
 
-    // -- Links (Whimsical Style) --
-    // Smooth, organic curves with rounded caps
+    // -- Links --
     g.selectAll(".link")
       .data(root.links())
       .join("path")
       .attr("class", "link")
       .attr("fill", "none")
-      .attr("stroke", CONFIG.colors.accent) // Dark Orange
-      .attr("stroke-width", (d: any) => Math.max(1, 3 - d.target.depth * 0.5)) // Thicker near root
+      .attr("stroke", CONFIG.colors.accent)
+      .attr("stroke-width", 2)
       .attr("stroke-opacity", 0.6)
-      .attr("stroke-linecap", "round") // Rounded ends
-      .attr("stroke-linejoin", "round")
-      .attr("d", (d: any) => {
-        const sX = screenX(d.source) - (d.source.data.contentWidth / 2);
-        const sY = screenY(d.source);
-        const tX = screenX(d.target) + (d.target.data.contentWidth / 2);
-        const tY = screenY(d.target);
-        
-        // Slightly curvier links
-        return d3.linkHorizontal()
-          .x((d: any) => d[0])
-          .y((d: any) => d[1])
-          ({ source: [sX, sY], target: [tX, tY] });
-      });
+      .attr("d", d3.linkHorizontal()
+          .x((d: any) => screenX(d))
+          .y((d: any) => screenY(d)) as any
+      );
 
     // -- Nodes --
     const node = g.selectAll(".node")
@@ -199,36 +165,16 @@ const MindMapVisualizer: React.FC<Props> = ({ data }) => {
       .attr("height", (d: any) => d.data.contentHeight)
       .attr("x", (d: any) => -d.data.contentWidth / 2)
       .attr("y", (d: any) => -d.data.contentHeight / 2)
-      .attr("rx", (d) => {
-          // Visually distinct corners based on hierarchy
-          if (d.depth === 0) return 16;
-          if (d.depth === 1) return 12;
-          return 8;
-      })
-      .attr("ry", (d) => {
-          if (d.depth === 0) return 16;
-          if (d.depth === 1) return 12;
-          return 8;
-      })
+      .attr("rx", 8)
+      .attr("ry", 8)
       .attr("fill", (d) => {
-         // Semantic background coloring
          if (d.depth === 0) return CONFIG.colors.nodes.root;
          if (d.depth === 1) return CONFIG.colors.nodes.main;
          if (d.depth === 2) return CONFIG.colors.nodes.sub;
          return CONFIG.colors.nodes.detail;
       })
       .attr("stroke", CONFIG.colors.border) 
-      .attr("stroke-width", (d) => {
-         // Thicker borders for higher hierarchy
-         if (d.depth === 0) return 3;
-         if (d.depth === 1) return 2.5;
-         if (d.depth === 2) return 1.5;
-         return 1;
-      })
-      .attr("filter", (d) => {
-          // Apply shadow to top-level nodes for depth
-          return d.depth < 2 ? "url(#node-shadow)" : null;
-      });
+      .attr("stroke-width", 1.5);
 
     // Text Lines
     node.each(function(d: any) {
@@ -239,19 +185,9 @@ const MindMapVisualizer: React.FC<Props> = ({ data }) => {
 
       el.append("text")
         .attr("font-family", CONFIG.fontFamily)
-        .attr("font-size", (d: any) => {
-            if (d.depth === 0) return CONFIG.fontSize * 1.2;
-            return CONFIG.fontSize;
-        })
-        .attr("font-weight", (d: any) => {
-             if (d.depth === 0) return "800";
-             if (d.depth === 1) return "700";
-             return "500";
-        })
-        .attr("fill", (d: any) => {
-            if (d.depth === 0) return CONFIG.colors.accent; 
-            return CONFIG.colors.text;
-        })
+        .attr("font-size", CONFIG.fontSize)
+        .attr("font-weight", (d: any) => d.depth === 0 ? "800" : "500")
+        .attr("fill", CONFIG.colors.text) // White text
         .attr("text-anchor", "middle")
         .selectAll("tspan")
         .data(lines)
@@ -273,16 +209,61 @@ const MindMapVisualizer: React.FC<Props> = ({ data }) => {
 
   }, [data]);
 
+  const handleDownloadImage = async () => {
+    if (!wrapperRef.current) return;
+    
+    setIsDownloading(true);
+    await new Promise(r => setTimeout(r, 100));
+
+    try {
+        const canvas = await html2canvas(wrapperRef.current, {
+            scale: 2,
+            backgroundColor: '#ffffff',
+            useCORS: true,
+            logging: false,
+        });
+
+        const link = document.createElement('a');
+        link.download = `fahim-mindmap-${Date.now()}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    } catch (e) {
+        console.error("Image download failed", e);
+        alert("حدث خطأ أثناء تحميل الصورة. يرجى المحاولة مرة أخرى.");
+    } finally {
+        setIsDownloading(false);
+    }
+  };
+
   return (
     <div ref={wrapperRef} className="w-full h-[700px] border-2 border-[#111111] bg-white overflow-hidden relative text-right rounded-xl" dir="rtl">
        {/* Legend/Controls */}
-       <div className="absolute top-4 right-4 z-10 bg-white/95 p-3 text-xs border border-[#111111] rounded-lg shadow-sm">
-         <div className="flex flex-col gap-1 text-[#111111]">
-             <span className="font-bold mb-1">التحكم:</span>
-             <span className="flex items-center gap-2">🖱️ السحب للتحريك</span>
-             <span className="flex items-center gap-2">🔍 العجلة للتكبير</span>
-         </div>
+       <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
+           <div className="bg-white/95 p-3 text-xs border border-[#111111] rounded-lg shadow-sm">
+             <div className="flex flex-col gap-1 text-[#111111]">
+                 <span className="font-bold mb-1">التحكم:</span>
+                 <span className="flex items-center gap-2">🖱️ السحب للتحريك</span>
+                 <span className="flex items-center gap-2">🔍 العجلة للتكبير</span>
+             </div>
+           </div>
+           
+           <button 
+             onClick={handleDownloadImage}
+             disabled={isDownloading}
+             className="bg-[#E65100] hover:bg-[#CC4700] text-white p-2 rounded-lg shadow-sm border border-[#E65100] flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+             title="تحميل الخريطة كصورة"
+           >
+              {isDownloading ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                  <>
+                    <Download className="w-5 h-5" />
+                    <span className="text-xs font-bold">تحميل PNG</span>
+                  </>
+              )}
+           </button>
        </div>
+       
       <svg ref={svgRef} className="w-full h-full touch-pan-x touch-pan-y cursor-grab active:cursor-grabbing"></svg>
     </div>
   );

@@ -8,9 +8,16 @@ interface Props {
 
 const PdfExportTemplate: React.FC<Props> = ({ sections }) => {
   return (
-    // Fixed position off-screen ensures it's rendered by the browser but not seen by user.
-    // 'left-[-10000px]' is safer than 'display: none' or z-index hacks for html2canvas.
-    <div id="pdf-export-container" className="fixed top-0 left-[-10000px] w-[800px] bg-white text-[#111111] font-sans" dir="rtl">
+    // Changed positioning strategy:
+    // Instead of left: -10000px which can cause browser optimization to unload fonts/textures,
+    // we use fixed at 0,0 but with negative z-index.
+    // This ensures the browser treats it as "visible" for rendering pipelines.
+    <div 
+      id="pdf-export-container" 
+      className="fixed top-0 left-0 w-[800px] bg-white text-[#111111] font-sans -z-50 pointer-events-none opacity-0" 
+      dir="rtl"
+      aria-hidden="true"
+    >
       <div className="p-8 space-y-8">
         
         {sections.map((section, index) => (
