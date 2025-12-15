@@ -207,19 +207,6 @@ This JSON is parsed and converted into an `AnalyzedSection` (with a generated UU
 
 ---
 
-## Suggested Emojis & Badges 🎨
-
-Emojis:
-- 🚀, 📄, 🤖, 🧠, 🗺️, ✨, ⚠️, 🔒, 📤, 📥
-
-Suggested shields:
-- [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-- [![Built with Vite](https://img.shields.io/badge/built%20with-vite-FF69B4.svg)](https://vitejs.dev/)
-- [![Gemini LLM](https://img.shields.io/badge/LLM-Gemini--2.5--flash-orange.svg)](#)
-- [![PDF.js](https://img.shields.io/badge/pdf.js-text-extraction-green.svg)](#)
-
----
-
 ## Limitations of Usage & Responsible Use 🛡️
 
 - Verify you have rights to process uploaded PDFs.
